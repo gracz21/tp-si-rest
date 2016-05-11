@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,9 @@ public class StudentResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public List<Student> getStudents(@QueryParam("first_name") String firstName,
-                                     @QueryParam("last_name") String lastName) {
+                                     @QueryParam("last_name") String lastName,
+                                     @DefaultValue("0") @QueryParam("direction") int direction,
+                                     @QueryParam("date") Date date) {
         Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
 
         List<Student> students = datastore.find(Student.class).asList();
@@ -32,6 +35,25 @@ public class StudentResource {
         if(lastName != null) {
             students = students.stream().filter(student -> student.getLastName().equals(lastName)).
                     collect(Collectors.toList());
+        }
+
+        if(date != null) {
+            switch(direction) {
+                case -1:
+                    students = students.stream().filter(student -> student.getDateOfBirth().before(date))
+                            .collect(Collectors.toList());
+                    break;
+                case 0:
+                    students = students.stream().filter(student -> student.getDateOfBirth().equals(date))
+                            .collect(Collectors.toList());
+                    break;
+                case 1:
+                    students = students.stream().filter(student -> student.getDateOfBirth().after(date))
+                            .collect(Collectors.toList());
+                    break;
+                default:
+                    break;
+            }
         }
 
         return students;

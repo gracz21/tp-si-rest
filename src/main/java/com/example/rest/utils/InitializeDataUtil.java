@@ -6,7 +6,10 @@ import com.example.rest.models.Student;
 import com.mongodb.DB;
 import org.mongodb.morphia.Datastore;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,7 +19,7 @@ public class InitializeDataUtil {
     private static List<Student> students = new ArrayList<>();
     private static List<Course> courses = new ArrayList<>();
 
-    public static void initializeData() {
+    public static void initializeData() throws ParseException {
         Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
 
         DB db = datastore.getDB();
@@ -28,10 +31,11 @@ public class InitializeDataUtil {
         initializeGrades(datastore);
     }
 
-    private static void initializeStudents(Datastore datastore) {
-        students.add(new Student(109714, "Kamil", "Walkowiak", "1993-03-24"));
-        students.add(new Student(343287, "Test", "Student", "1990-01-01"));
-        students.add(new Student(111111, "Other", "Student", "1992-09-13"));
+    private static void initializeStudents(Datastore datastore) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        students.add(new Student(109714, "Kamil", "Walkowiak", formatter.parse("1993-03-24")));
+        students.add(new Student(343287, "Test", "Student", formatter.parse("1990-01-01")));
+        students.add(new Student(111111, "Other", "Student", formatter.parse("1994-09-13")));
         datastore.save(students);
     }
 

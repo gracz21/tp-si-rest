@@ -1,6 +1,7 @@
 package com.example.rest.models;
 
 import com.example.rest.resources.StudentResource;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.bson.types.ObjectId;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
@@ -13,6 +14,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -37,7 +39,9 @@ public class Student {
     private String lastName;
 
     @NotNull
-    private String dateOfBirth;
+    @JsonFormat(shape=JsonFormat.Shape.STRING,
+            pattern="yyyy-MM-dd", timezone="CET")
+    private Date dateOfBirth;
 
     @InjectLink(resource = StudentResource.class, method = "getStudent", style = InjectLink.Style.ABSOLUTE,
             bindings = @Binding(name = "index", value = "${instance.index}"), rel = "self")
@@ -48,7 +52,7 @@ public class Student {
     public Student() {
     }
 
-    public Student(long index, String firstName, String lastName, String dateOfBirth) {
+    public Student(long index, String firstName, String lastName, Date dateOfBirth) {
         this.index = index;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -76,7 +80,7 @@ public class Student {
         return lastName;
     }
 
-    public String getDateOfBirth() {
+    public Date getDateOfBirth() {
         return dateOfBirth;
     }
 
@@ -96,7 +100,7 @@ public class Student {
         this.lastName = lastName;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
+    public void setDateOfBirth(Date dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 }
