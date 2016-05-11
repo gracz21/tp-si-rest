@@ -125,4 +125,16 @@ public class Grade {
 
         return result;
     }
+
+    public static boolean validateGivenNote(double note) {
+        boolean result = false;
+
+        for(double element: noteScale) {
+            if(note == element) {
+                result = true;
+            }
+        }
+
+        return result;
+    }
 }

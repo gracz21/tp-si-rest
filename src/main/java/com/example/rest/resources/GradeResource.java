@@ -17,6 +17,7 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Kamil Walkowiak
@@ -26,7 +27,8 @@ public class GradeResource {
 
     @GET
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public List<Grade> getGrades(@PathParam("index") final long index, @PathParam("courseId") final long courseId) {
+    public List<Grade> getGrades(@PathParam("index") final long index, @PathParam("courseId") final long courseId,
+                                 @DefaultValue("1") @QueryParam("direction") int direction, @QueryParam("note") Double note) {
         Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
         Course course = datastore.find(Course.class).field("courseId").equal(courseId).get();
         Student student = datastore.find(Student.class).field("index").equal(index).get();
@@ -34,7 +36,23 @@ public class GradeResource {
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).entity("Not found").build());
         }
 
-        return course.getStudentGradesList(index);
+        List<Grade> grades = course.getStudentGradesList(index);
+        if(note != null) {
+            if(Grade.validateGivenNote(note)) {
+                switch(direction) {
+                    case -1:
+                        grades = grades.stream().filter(grade -> grade.getNote() <= note).collect(Collectors.toList());
+                        break;
+                    case 1:
+                        grades = grades.stream().filter(grade -> grade.getNote() >= note).collect(Collectors.toList());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return grades;
     }
 
     @Path("/{id}")
