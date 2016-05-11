@@ -11,6 +11,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Kamil Walkowiak
@@ -19,9 +20,21 @@ import java.util.List;
 public class StudentResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public List<Student> getStudents() {
+    public List<Student> getStudents(@QueryParam("first_name") String firstName,
+                                     @QueryParam("last_name") String lastName) {
         Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
-        return datastore.find(Student.class).asList();
+
+        List<Student> students = datastore.find(Student.class).asList();
+        if(firstName != null) {
+            students = students.stream().filter(student -> student.getFirstName().equals(firstName)).
+                    collect(Collectors.toList());
+        }
+        if(lastName != null) {
+            students = students.stream().filter(student -> student.getLastName().equals(lastName)).
+                    collect(Collectors.toList());
+        }
+
+        return students;
     }
 
     @Path("/{index}")
