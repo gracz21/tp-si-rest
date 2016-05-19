@@ -1,8 +1,10 @@
 package com.example.rest.utils;
 
+import com.example.rest.models.Counter;
 import com.example.rest.models.Course;
 import com.example.rest.models.Grade;
 import com.example.rest.models.Student;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import org.mongodb.morphia.Datastore;
 
@@ -18,24 +20,37 @@ import java.util.List;
 public class InitializeDataUtil {
     private static List<Student> students = new ArrayList<>();
     private static List<Course> courses = new ArrayList<>();
+    private static List<Counter> counters = new ArrayList<>();
 
     public static void initializeData() throws ParseException {
         Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
 
-        DB db = datastore.getDB();
-        db.getCollection("students").drop();
-        db.getCollection("courses").drop();
+        if(datastore.getCount(Counter.class) == 0) {
+            initializeCounters(datastore);
+        }
 
-        initializeStudents(datastore);
-        initializeCourses(datastore);
-        initializeGrades(datastore);
+        if(datastore.getCount(Student.class) == 0) {
+            initializeStudents(datastore);
+        }
+
+        if(datastore.getCount(Course.class) == 0) {
+            initializeCourses(datastore);
+            initializeGrades(datastore);
+        }
+    }
+
+    private static void initializeCounters(Datastore datastore) {
+        counters.add(new Counter("studentIndex"));
+        counters.add(new Counter("courseId"));
+        counters.add(new Counter("gradeId"));
+        datastore.save(counters);
     }
 
     private static void initializeStudents(Datastore datastore) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        students.add(new Student(109714, "Kamil", "Walkowiak", formatter.parse("1993-03-24")));
-        students.add(new Student(343287, "Test", "Student", formatter.parse("1990-01-01")));
-        students.add(new Student(111111, "Other", "Student", formatter.parse("1994-09-13")));
+        students.add(new Student("Kamil", "Walkowiak", formatter.parse("1993-03-24")));
+        students.add(new Student("Test", "Student", formatter.parse("1990-01-01")));
+        students.add(new Student("Other", "Student", formatter.parse("1994-09-13")));
         datastore.save(students);
     }
 

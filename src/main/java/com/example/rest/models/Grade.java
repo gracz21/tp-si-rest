@@ -3,10 +3,14 @@ package com.example.rest.models;
 import com.example.rest.resources.CourseResource;
 import com.example.rest.resources.GradeResource;
 import com.example.rest.resources.StudentResource;
+import com.example.rest.utils.DatastoreHandlerUtil;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
 import org.glassfish.jersey.linking.InjectLinks;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.annotations.*;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Link;
@@ -24,8 +28,6 @@ import java.util.concurrent.atomic.AtomicLong;
 @Embedded
 public class Grade {
     private static final double[] noteScale = new double[]{2.0, 3.0, 3.5, 4.0, 4.5, 5.0};
-
-    private static final AtomicLong idCounter = new AtomicLong();
 
     private long id;
     @NotNull
@@ -59,7 +61,7 @@ public class Grade {
     }
 
     public Grade(double note, String date, Student student, long courseId) {
-        this.id = idCounter.incrementAndGet();
+        initId();
         this.note = note;
         this.date = date;
         this.student = student;
@@ -67,7 +69,10 @@ public class Grade {
     }
 
     public void initId() {
-        this.id = idCounter.incrementAndGet();
+        Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
+        Query<Counter> query = datastore.find(Counter.class, "_id", "gradeId");
+        UpdateOperations<Counter> operation = datastore.createUpdateOperations(Counter.class).inc("seq");
+        this.id = datastore.findAndModify(query, operation).getSeq();
     }
 
     public long getId() {
@@ -84,10 +89,6 @@ public class Grade {
 
     public Student getStudent() {
         return student;
-    }
-
-    public static AtomicLong getIdCounter() {
-        return idCounter;
     }
 
     public long getCourseId() {

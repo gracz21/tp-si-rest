@@ -1,11 +1,15 @@
 package com.example.rest.models;
 
 import com.example.rest.resources.StudentResource;
+import com.example.rest.utils.DatastoreHandlerUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.bson.types.ObjectId;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.annotations.*;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
@@ -52,15 +56,22 @@ public class Student {
     public Student() {
     }
 
-    public Student(long index, String firstName, String lastName, Date dateOfBirth) {
-        this.index = index;
+    public Student(String firstName, String lastName, Date dateOfBirth) {
+        initializeIndex();
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
     }
 
+    public static void initializeIdCounter(long value) {
+        idCounter.set(value);
+    }
+
     public void initializeIndex() {
-        this.index = idCounter.incrementAndGet();
+        Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
+        Query<Counter> query = datastore.find(Counter.class, "_id", "studentIndex");
+        UpdateOperations<Counter> operation = datastore.createUpdateOperations(Counter.class).inc("seq");
+        this.index = datastore.findAndModify(query, operation).getSeq();
     }
 
     @XmlTransient

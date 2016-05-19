@@ -1,13 +1,17 @@
 package com.example.rest.models;
 
 import com.example.rest.resources.CourseResource;
+import com.example.rest.utils.DatastoreHandlerUtil;
 import org.bson.types.ObjectId;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Link;
@@ -28,8 +32,6 @@ import java.util.stream.Collectors;
 @Entity("courses")
 @XmlRootElement
 public class Course {
-    private final static AtomicLong idCounter = new AtomicLong();
-
     @XmlTransient
     @Id
     private ObjectId id;
@@ -57,14 +59,17 @@ public class Course {
     }
 
     public Course(String name, String leader) {
-        this.courseId = idCounter.incrementAndGet();
+        initializeCourseId();
         this.name = name;
         this.leader = leader;
         this.grades = new LinkedList<>();
     }
 
     public void initializeCourseId() {
-        this.courseId = idCounter.incrementAndGet();
+        Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
+        Query<Counter> query = datastore.find(Counter.class, "_id", "courseId");
+        UpdateOperations<Counter> operation = datastore.createUpdateOperations(Counter.class).inc("seq");
+        this.courseId = datastore.findAndModify(query, operation).getSeq();
     }
 
     @XmlTransient
