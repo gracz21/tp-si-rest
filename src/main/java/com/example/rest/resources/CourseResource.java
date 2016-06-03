@@ -1,5 +1,6 @@
 package com.example.rest.resources;
 
+import com.example.rest.models.Grade;
 import com.example.rest.utils.DatastoreHandlerUtil;
 import com.example.rest.models.Course;
 import org.bson.types.ObjectId;
@@ -91,5 +92,35 @@ public class CourseResource {
 
         datastore.delete(course);
         return Response.ok("Course with index " + id + " removed").build();
+    }
+
+    @Path("/{id}/grades")
+    @GET
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public List<Grade> getGrades(@PathParam("id") final long id,
+                                 @DefaultValue("1") @QueryParam("direction") int direction, @QueryParam("note") Double note) {
+        Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
+        Course course = datastore.find(Course.class).field("courseId").equal(id).get();
+        if(course == null) {
+            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).entity("Not found").build());
+        }
+
+        List<Grade> grades = course.getGrades();
+        if(note != null) {
+            if(Grade.validateGivenNote(note)) {
+                switch(direction) {
+                    case -1:
+                        grades = grades.stream().filter(grade -> grade.getNote() <= note).collect(Collectors.toList());
+                        break;
+                    case 1:
+                        grades = grades.stream().filter(grade -> grade.getNote() >= note).collect(Collectors.toList());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return grades;
     }
 }

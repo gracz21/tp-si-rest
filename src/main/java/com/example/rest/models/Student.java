@@ -27,8 +27,6 @@ import java.util.concurrent.atomic.AtomicLong;
 @Entity("students")
 @XmlRootElement
 public class Student {
-    private static final AtomicLong idCounter = new AtomicLong();
-
     @XmlTransient
     @Id
     private ObjectId id;
@@ -61,10 +59,6 @@ public class Student {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
-    }
-
-    public static void initializeIdCounter(long value) {
-        idCounter.set(value);
     }
 
     public void initializeIndex() {
