@@ -1,6 +1,7 @@
 package com.example.rest;
 
 import com.example.rest.adapters.DateParamConverterProvider;
+import com.example.rest.utils.CustomHeaders;
 import com.example.rest.utils.InitializeDataUtil;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -22,7 +23,7 @@ public class Server {
         URI baseUri = UriBuilder.fromUri("http://localhost/").port(8000).build();
         DateParamConverterProvider dateParamConverterProvider = new DateParamConverterProvider("yyyy-MM-dd");
         ResourceConfig config = new ResourceConfig().packages("com.example.rest.resources")
-                .register(DeclarativeLinkingFeature.class).register(dateParamConverterProvider);
+                .register(DeclarativeLinkingFeature.class).register(dateParamConverterProvider).register(CustomHeaders.class);
         HttpServer server = GrizzlyHttpServerFactory.createHttpServer(baseUri, config);
         server.start();
     }
