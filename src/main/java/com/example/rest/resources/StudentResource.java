@@ -102,7 +102,7 @@ public class StudentResource {
             studentParams.setId(updatedStudent.getId());
         }
 
-        datastore.save(updatedStudent);
+        datastore.save(studentParams);
         return Response.ok(studentParams).build();
     }
 
