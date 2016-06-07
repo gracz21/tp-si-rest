@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,9 +23,22 @@ import java.util.stream.Collectors;
 /**
  * @author Kamil Walkowiak
  */
-@Path("/students/{index}/courses/{courseId}/grades")
+@Path("/")
 public class GradeResource {
+    @Path("/grades")
+    @GET
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public List<Grade> getAllGrades() {
+        Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
+        List<Course> courses = datastore.find(Course.class).asList();
 
+        List<Grade> grades = new ArrayList<>();
+        courses.stream().forEach(course -> grades.addAll(course.getGrades()));
+
+        return grades;
+    }
+
+    @Path("/students/{index}/courses/{courseId}/grades")
     @GET
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public List<Grade> getGrades(@PathParam("index") final long index, @PathParam("courseId") final long courseId,
@@ -55,7 +69,7 @@ public class GradeResource {
         return grades;
     }
 
-    @Path("/{id}")
+    @Path("/students/{index}/courses/{courseId}/grades/{id}")
     @GET
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getGrade(@PathParam("index") final long index, @PathParam("courseId") final long courseId,
@@ -74,6 +88,7 @@ public class GradeResource {
         return Response.ok(grade).build();
     }
 
+    @Path("/students/{index}/courses/{courseId}/grades")
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -100,7 +115,7 @@ public class GradeResource {
         return Response.created(uri).entity(grade).build();
     }
 
-    @Path("/{id}")
+    @Path("/students/{index}/courses/{courseId}/grades/{id}")
     @PUT
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -131,7 +146,7 @@ public class GradeResource {
         return Response.ok(gradeParams).build();
     }
 
-    @Path("/{id}")
+    @Path("/students/{index}/courses/{courseId}/grades/{id}")
     @DELETE
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response deleteGrade(@PathParam("index") final long index, @PathParam("courseId") final long courseId,
