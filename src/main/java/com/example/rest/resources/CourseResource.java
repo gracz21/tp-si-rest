@@ -57,7 +57,7 @@ public class CourseResource {
 
         course.initializeCourseId();
         datastore.save(course);
-        URI uri = uriInfo.getAbsolutePathBuilder().path(course.getId().toString()).build();
+        URI uri = uriInfo.getAbsolutePathBuilder().path(Long.toString(course.getCourseId())).build();
         return Response.created(uri).entity(course).build();
     }
 

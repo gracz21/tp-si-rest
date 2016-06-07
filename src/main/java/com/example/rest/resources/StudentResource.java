@@ -1,5 +1,6 @@
 package com.example.rest.resources;
 
+import com.example.rest.models.Grade;
 import com.example.rest.utils.DatastoreHandlerUtil;
 import com.example.rest.models.Course;
 import com.example.rest.models.Student;
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -125,5 +127,18 @@ public class StudentResource {
         datastore.delete(student);
 
         return Response.ok("Student with index " + index + " removed").build();
+    }
+
+    @Path("/{index}/grades")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public List<Grade> getGrades(@PathParam("index") final long index) {
+        Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
+        List<Course> courses = datastore.find(Course.class).asList();
+
+        List<Grade> grades = new ArrayList<>();
+        courses.stream().forEach(course -> grades.addAll(course.getStudentGradesList(index)));
+
+        return grades;
     }
 }
