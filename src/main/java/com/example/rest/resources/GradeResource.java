@@ -4,7 +4,6 @@ import com.example.rest.utils.DatastoreHandlerUtil;
 import com.example.rest.models.Course;
 import com.example.rest.models.Grade;
 import com.example.rest.models.Student;
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 
 import javax.validation.Valid;
@@ -15,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,22 +21,9 @@ import java.util.stream.Collectors;
 /**
  * @author Kamil Walkowiak
  */
-@Path("/")
+@Path("/students/{index}/courses/{courseId}/grades")
 public class GradeResource {
-    @Path("/grades")
-    @GET
-    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public List<Grade> getAllGrades() {
-        Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
-        List<Course> courses = datastore.find(Course.class).asList();
 
-        List<Grade> grades = new ArrayList<>();
-        courses.stream().forEach(course -> grades.addAll(course.getGrades()));
-
-        return grades;
-    }
-
-    @Path("/students/{index}/courses/{courseId}/grades")
     @GET
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public List<Grade> getGrades(@PathParam("index") final long index, @PathParam("courseId") final long courseId,
@@ -69,7 +54,7 @@ public class GradeResource {
         return grades;
     }
 
-    @Path("/students/{index}/courses/{courseId}/grades/{id}")
+    @Path("/{id}")
     @GET
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response getGrade(@PathParam("index") final long index, @PathParam("courseId") final long courseId,
@@ -88,7 +73,6 @@ public class GradeResource {
         return Response.ok(grade).build();
     }
 
-    @Path("/students/{index}/courses/{courseId}/grades")
     @POST
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -115,7 +99,7 @@ public class GradeResource {
         return Response.created(uri).entity(grade).build();
     }
 
-    @Path("/students/{index}/courses/{courseId}/grades/{id}")
+    @Path("/{id}")
     @PUT
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -146,7 +130,7 @@ public class GradeResource {
         return Response.ok(gradeParams).build();
     }
 
-    @Path("/students/{index}/courses/{courseId}/grades/{id}")
+    @Path("/{id}")
     @DELETE
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response deleteGrade(@PathParam("index") final long index, @PathParam("courseId") final long courseId,
