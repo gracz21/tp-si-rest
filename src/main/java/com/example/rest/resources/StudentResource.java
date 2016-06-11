@@ -27,11 +27,15 @@ public class StudentResource {
     public List<Student> getStudents(@QueryParam("firstName") String firstName,
                                      @QueryParam("lastName") String lastName,
                                      @DefaultValue("0") @QueryParam("direction") int direction,
+                                     @QueryParam("indexQuery") Long index,
                                      @QueryParam("dateOfBirthQuery") Date date, @QueryParam("firstNameQuery") String firstNameQuery,
                                      @QueryParam("lastNameQuery") String lastNameQuery) {
         Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
 
         List<Student> students = datastore.find(Student.class).asList();
+        if(index != null) {
+            students = students.stream().filter(student -> student.getIndex() == index).collect(Collectors.toList());
+        }
         if(firstName != null) {
             students = students.stream().filter(student -> student.getFirstName().equals(firstName)).
                     collect(Collectors.toList());
