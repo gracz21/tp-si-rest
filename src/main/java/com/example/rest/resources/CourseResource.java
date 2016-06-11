@@ -1,5 +1,6 @@
 package com.example.rest.resources;
 
+import com.example.rest.models.Grade;
 import com.example.rest.utils.DatastoreHandlerUtil;
 import com.example.rest.models.Course;
 import org.bson.types.ObjectId;
@@ -23,12 +24,23 @@ import java.util.stream.Collectors;
 public class CourseResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public List<Course> getCourses(@QueryParam("leader") String leader) {
+    public List<Course> getCourses(@QueryParam("leader") String leader, @QueryParam("nameQuery") String nameQuery,
+                                   @QueryParam("leaderQuery") String leaderQuery) {
         Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
 
         List<Course> courses = datastore.find(Course.class).asList();
-        if(leader != null) {
+        if(leader != null && leader.length() > 0) {
             courses = courses.stream().filter(course -> course.getLeader().equals(leader)).collect(Collectors.toList());
+        }
+
+        if(nameQuery != null && nameQuery.length() > 0) {
+            courses = courses.stream().filter(course -> course.getName().toLowerCase()
+                    .contains(nameQuery.toLowerCase())).collect(Collectors.toList());
+        }
+
+        if(leaderQuery != null && leaderQuery.length() > 0) {
+            courses = courses.stream().filter(course -> course.getLeader().toLowerCase()
+                    .contains(leaderQuery.toLowerCase())).collect(Collectors.toList());
         }
 
         return courses;
@@ -56,7 +68,7 @@ public class CourseResource {
 
         course.initializeCourseId();
         datastore.save(course);
-        URI uri = uriInfo.getAbsolutePathBuilder().path(course.getId().toString()).build();
+        URI uri = uriInfo.getAbsolutePathBuilder().path(Long.toString(course.getCourseId())).build();
         return Response.created(uri).entity(course).build();
     }
 
@@ -91,5 +103,35 @@ public class CourseResource {
 
         datastore.delete(course);
         return Response.ok("Course with index " + id + " removed").build();
+    }
+
+    @Path("/{id}/grades")
+    @GET
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public List<Grade> getGrades(@PathParam("id") final long id,
+                                 @DefaultValue("1") @QueryParam("direction") int direction, @QueryParam("note") Double note) {
+        Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
+        Course course = datastore.find(Course.class).field("courseId").equal(id).get();
+        if(course == null) {
+            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).entity("Not found").build());
+        }
+
+        List<Grade> grades = course.getGrades();
+        if(note != null) {
+            if(Grade.validateGivenNote(note)) {
+                switch(direction) {
+                    case -1:
+                        grades = grades.stream().filter(grade -> grade.getNote() <= note).collect(Collectors.toList());
+                        break;
+                    case 1:
+                        grades = grades.stream().filter(grade -> grade.getNote() >= note).collect(Collectors.toList());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return grades;
     }
 }

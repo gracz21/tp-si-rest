@@ -1,5 +1,6 @@
 package com.example.rest.resources;
 
+import com.example.rest.models.Grade;
 import com.example.rest.utils.DatastoreHandlerUtil;
 import com.example.rest.models.Course;
 import com.example.rest.models.Student;
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,10 +23,11 @@ import java.util.stream.Collectors;
 public class StudentResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public List<Student> getStudents(@QueryParam("first_name") String firstName,
-                                     @QueryParam("last_name") String lastName,
+    public List<Student> getStudents(@QueryParam("firstName") String firstName,
+                                     @QueryParam("lastName") String lastName,
                                      @DefaultValue("0") @QueryParam("direction") int direction,
-                                     @QueryParam("date") Date date) {
+                                     @QueryParam("dateOfBirthQuery") Date date, @QueryParam("firstNameQuery") String firstNameQuery,
+                                     @QueryParam("lastNameQuery") String lastNameQuery) {
         Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
 
         List<Student> students = datastore.find(Student.class).asList();
@@ -54,6 +57,16 @@ public class StudentResource {
                 default:
                     break;
             }
+        }
+
+        if(firstNameQuery != null && firstNameQuery.length() > 0) {
+            students = students.stream().filter(student -> student.getFirstName().toLowerCase()
+                    .contains(firstNameQuery.toLowerCase())).collect(Collectors.toList());
+        }
+
+        if(lastNameQuery != null && lastNameQuery.length() > 0) {
+            students = students.stream().filter(student -> student.getLastName().toLowerCase()
+                    .contains(lastNameQuery.toLowerCase())).collect(Collectors.toList());
         }
 
         return students;
@@ -102,7 +115,7 @@ public class StudentResource {
             studentParams.setId(updatedStudent.getId());
         }
 
-        datastore.save(updatedStudent);
+        datastore.save(studentParams);
         return Response.ok(studentParams).build();
     }
 
@@ -125,5 +138,18 @@ public class StudentResource {
         datastore.delete(student);
 
         return Response.ok("Student with index " + index + " removed").build();
+    }
+
+    @Path("/{index}/grades")
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public List<Grade> getGrades(@PathParam("index") final long index) {
+        Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
+        List<Course> courses = datastore.find(Course.class).asList();
+
+        List<Grade> grades = new ArrayList<>();
+        courses.stream().forEach(course -> grades.addAll(course.getStudentGradesList(index)));
+
+        return grades;
     }
 }

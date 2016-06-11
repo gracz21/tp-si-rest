@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.bson.types.ObjectId;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
+import org.glassfish.jersey.linking.InjectLinks;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.annotations.*;
 import org.mongodb.morphia.query.Query;
@@ -15,10 +16,12 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Link;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -27,8 +30,6 @@ import java.util.concurrent.atomic.AtomicLong;
 @Entity("students")
 @XmlRootElement
 public class Student {
-    private static final AtomicLong idCounter = new AtomicLong();
-
     @XmlTransient
     @Id
     private ObjectId id;
@@ -47,11 +48,16 @@ public class Student {
             pattern="yyyy-MM-dd", timezone="CET")
     private Date dateOfBirth;
 
-    @InjectLink(resource = StudentResource.class, method = "getStudent", style = InjectLink.Style.ABSOLUTE,
-            bindings = @Binding(name = "index", value = "${instance.index}"), rel = "self")
+    @InjectLinks({
+            @InjectLink(resource = StudentResource.class, method = "getStudent", style = InjectLink.Style.ABSOLUTE,
+                    bindings = @Binding(name = "index", value = "${instance.index}"), rel = "self"),
+            @InjectLink(resource = StudentResource.class, method = "getGrades", style = InjectLink.Style.ABSOLUTE,
+                    bindings = @Binding(name = "index", value = "${instance.index}"), rel = "grades")
+    })
     @XmlElement(name="link")
+    @XmlElementWrapper(name = "links")
     @XmlJavaTypeAdapter(Link.JaxbAdapter.class)
-    private Link link;
+    private List<Link> links;
 
     public Student() {
     }
@@ -61,10 +67,6 @@ public class Student {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
-    }
-
-    public static void initializeIdCounter(long value) {
-        idCounter.set(value);
     }
 
     public void initializeIndex() {

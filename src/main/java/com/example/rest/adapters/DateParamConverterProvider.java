@@ -32,7 +32,7 @@ public class DateParamConverterProvider implements ParamConverterProvider {
 
 			@Override
 			public Date fromString(String value) {
-				if (value == null)
+				if (value == null || value.length() == 0)
 					return null;
 
 				SimpleDateFormat formatter = new SimpleDateFormat(format);

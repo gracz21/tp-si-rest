@@ -5,6 +5,7 @@ import com.example.rest.utils.DatastoreHandlerUtil;
 import org.bson.types.ObjectId;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
+import org.glassfish.jersey.linking.InjectLinks;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -16,6 +17,7 @@ import org.mongodb.morphia.query.UpdateOperations;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Link;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -48,11 +50,20 @@ public class Course {
     @Embedded
     private List<Grade> grades;
 
-    @InjectLink(resource = CourseResource.class, method = "getCourse", style = InjectLink.Style.ABSOLUTE,
-            bindings = @Binding(name = "courseId", value = "${instance.courseId}"), rel = "self")
+    @InjectLinks({
+            @InjectLink(resource = CourseResource.class, method = "getCourse", style = InjectLink.Style.ABSOLUTE,
+                    bindings = @Binding(name = "courseId", value = "${instance.courseId}"), rel = "self"),
+            @InjectLink(resource = CourseResource.class, method = "getGrades", style = InjectLink.Style.ABSOLUTE,
+                bindings = {
+                        @Binding(name = "id", value = "${instance.courseId}"),
+                        @Binding(name = "direction", value = ""),
+                        @Binding(name = "note", value = "")
+                }, rel = "grades")
+    })
     @XmlElement(name="link")
+    @XmlElementWrapper(name = "links")
     @XmlJavaTypeAdapter(Link.JaxbAdapter.class)
-    private Link link;
+    private List<Link> links;
 
     public Course() {
         this.grades = new LinkedList<>();

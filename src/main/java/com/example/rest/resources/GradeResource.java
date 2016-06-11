@@ -4,7 +4,6 @@ import com.example.rest.utils.DatastoreHandlerUtil;
 import com.example.rest.models.Course;
 import com.example.rest.models.Grade;
 import com.example.rest.models.Student;
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 
 import javax.validation.Valid;
