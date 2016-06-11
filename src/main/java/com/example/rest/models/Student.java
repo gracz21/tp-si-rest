@@ -50,9 +50,7 @@ public class Student {
 
     @InjectLinks({
             @InjectLink(resource = StudentResource.class, method = "getStudent", style = InjectLink.Style.ABSOLUTE,
-                    bindings = @Binding(name = "index", value = "${instance.index}"), rel = "self"),
-            @InjectLink(resource = StudentResource.class, method = "getGrades", style = InjectLink.Style.ABSOLUTE,
-                    bindings = @Binding(name = "index", value = "${instance.index}"), rel = "grades")
+                    bindings = @Binding(name = "index", value = "${instance.index}"), rel = "self")
     })
     @XmlElement(name="link")
     @XmlElementWrapper(name = "links")

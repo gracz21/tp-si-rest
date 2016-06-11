@@ -4,6 +4,7 @@ import com.example.rest.utils.DatastoreHandlerUtil;
 import com.example.rest.models.Course;
 import com.example.rest.models.Grade;
 import com.example.rest.models.Student;
+import com.example.rest.utils.GradesListUtil;
 import org.mongodb.morphia.Datastore;
 
 import javax.validation.Valid;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +29,8 @@ public class GradeResource {
     @GET
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public List<Grade> getGrades(@PathParam("index") final long index, @PathParam("courseId") final long courseId,
-                                 @DefaultValue("1") @QueryParam("direction") int direction, @QueryParam("note") Double note) {
+                                 @DefaultValue("0") @QueryParam("direction") int direction,
+                                 @QueryParam("noteQuery") Double note) {
         Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
         Course course = datastore.find(Course.class).field("courseId").equal(courseId).get();
         Student student = datastore.find(Student.class).field("index").equal(index).get();
@@ -38,16 +41,7 @@ public class GradeResource {
         List<Grade> grades = course.getStudentGradesList(index);
         if(note != null) {
             if(Grade.validateGivenNote(note)) {
-                switch(direction) {
-                    case -1:
-                        grades = grades.stream().filter(grade -> grade.getNote() <= note).collect(Collectors.toList());
-                        break;
-                    case 1:
-                        grades = grades.stream().filter(grade -> grade.getNote() >= note).collect(Collectors.toList());
-                        break;
-                    default:
-                        break;
-                }
+                grades = GradesListUtil.getGradesByNote(grades, note, direction);
             }
         }
 

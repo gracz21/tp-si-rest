@@ -4,6 +4,7 @@ import com.example.rest.models.Grade;
 import com.example.rest.utils.DatastoreHandlerUtil;
 import com.example.rest.models.Course;
 import com.example.rest.models.Student;
+import com.example.rest.utils.GradesListUtil;
 import org.mongodb.morphia.Datastore;
 
 import javax.validation.Valid;
@@ -143,12 +144,21 @@ public class StudentResource {
     @Path("/{index}/grades")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public List<Grade> getGrades(@PathParam("index") final long index) {
+    public List<Grade> getGrades(@PathParam("index") final long index,
+                                 @QueryParam("noteQuery") Double note, @QueryParam("dateQuery") Date date) {
         Datastore datastore = DatastoreHandlerUtil.getInstance().getDatastore();
         List<Course> courses = datastore.find(Course.class).asList();
 
-        List<Grade> grades = new ArrayList<>();
-        courses.stream().forEach(course -> grades.addAll(course.getStudentGradesList(index)));
+        List<Grade> grades = courses.stream().
+                flatMap(course -> course.getStudentGradesList(index).stream()).collect(Collectors.toList());
+
+        if(note != null) {
+            grades = GradesListUtil.getGradesByNote(grades, note, 0);
+        }
+
+        if(date != null) {
+            grades = GradesListUtil.getGradesByDate(grades, date);
+        }
 
         return grades;
     }

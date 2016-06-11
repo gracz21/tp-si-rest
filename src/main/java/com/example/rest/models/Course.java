@@ -21,6 +21,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -52,13 +53,7 @@ public class Course {
 
     @InjectLinks({
             @InjectLink(resource = CourseResource.class, method = "getCourse", style = InjectLink.Style.ABSOLUTE,
-                    bindings = @Binding(name = "courseId", value = "${instance.courseId}"), rel = "self"),
-            @InjectLink(resource = CourseResource.class, method = "getGrades", style = InjectLink.Style.ABSOLUTE,
-                bindings = {
-                        @Binding(name = "id", value = "${instance.courseId}"),
-                        @Binding(name = "direction", value = ""),
-                        @Binding(name = "note", value = "")
-                }, rel = "grades")
+                    bindings = @Binding(name = "courseId", value = "${instance.courseId}"), rel = "self")
     })
     @XmlElement(name="link")
     @XmlElementWrapper(name = "links")
