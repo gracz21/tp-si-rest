@@ -4,6 +4,7 @@ import com.example.rest.resources.CourseResource;
 import com.example.rest.resources.GradeResource;
 import com.example.rest.resources.StudentResource;
 import com.example.rest.utils.DatastoreHandlerUtil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
 import org.glassfish.jersey.linking.InjectLinks;
@@ -18,6 +19,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -34,7 +36,9 @@ public class Grade {
     private double note;
 
     @NotNull
-    private String date;
+    @JsonFormat(shape=JsonFormat.Shape.STRING,
+            pattern="yyyy-MM-dd", timezone="CET")
+    private Date date;
 
     @Reference
     private Student student;
@@ -60,7 +64,7 @@ public class Grade {
     public Grade() {
     }
 
-    public Grade(double note, String date, Student student, long courseId) {
+    public Grade(double note, Date date, Student student, long courseId) {
         initId();
         this.note = note;
         this.date = date;
@@ -83,7 +87,7 @@ public class Grade {
         return note;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
@@ -103,7 +107,7 @@ public class Grade {
         this.note = note;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 

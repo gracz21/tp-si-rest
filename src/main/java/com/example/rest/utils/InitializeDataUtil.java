@@ -61,11 +61,12 @@ public class InitializeDataUtil {
         datastore.save(courses);
     }
 
-    private static void initializeGrades(Datastore datastore) {
-        datastore.update(courses.get(0), datastore.createUpdateOperations(Course.class).add("grades", new Grade(5.0, "2016-04-22", students.get(0), courses.get(0).getCourseId())));
-        datastore.update(courses.get(0), datastore.createUpdateOperations(Course.class).add("grades", new Grade(5.0, "2016-04-29", students.get(0), courses.get(0).getCourseId())));
-        datastore.update(courses.get(0), datastore.createUpdateOperations(Course.class).add("grades", new Grade(2.0, "2016-04-15", students.get(1), courses.get(0).getCourseId())));
-        datastore.update(courses.get(1), datastore.createUpdateOperations(Course.class).add("grades", new Grade(5.0, "2016-04-20", students.get(0), courses.get(1).getCourseId())));
-        datastore.update(courses.get(2), datastore.createUpdateOperations(Course.class).add("grades", new Grade(3.0, "2016-04-15", students.get(2), courses.get(2).getCourseId())));
+    private static void initializeGrades(Datastore datastore) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        datastore.update(courses.get(0), datastore.createUpdateOperations(Course.class).add("grades", new Grade(5.0, dateFormat.parse("2016-04-22"), students.get(0), courses.get(0).getCourseId())));
+        datastore.update(courses.get(0), datastore.createUpdateOperations(Course.class).add("grades", new Grade(5.0, dateFormat.parse("2016-04-29"), students.get(0), courses.get(0).getCourseId())));
+        datastore.update(courses.get(0), datastore.createUpdateOperations(Course.class).add("grades", new Grade(2.0, dateFormat.parse("2016-04-15"), students.get(1), courses.get(0).getCourseId())));
+        datastore.update(courses.get(1), datastore.createUpdateOperations(Course.class).add("grades", new Grade(5.0, dateFormat.parse("2016-04-20"), students.get(0), courses.get(1).getCourseId())));
+        datastore.update(courses.get(2), datastore.createUpdateOperations(Course.class).add("grades", new Grade(3.0, dateFormat.parse("2016-04-15"), students.get(2), courses.get(2).getCourseId())));
     }
 }
